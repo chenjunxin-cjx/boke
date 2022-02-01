@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--根节点，将可以将根节点设置成以下属性：trace,debug,info,warn,error,fatal，
+级别越低看见的日志越多，级别从高到低排序：all:打开所有日志记录，trace,debug,info,warn,error,faltal,off：关闭所有日志记录-->
+<Configuration status="WARN">
+<!--    设置常量以便于被引用，一般用来指定文件存储的位置-->
+    <properties>
+        <property name="LOG_HOME">E:/logs</property>
+        <property name="FILE_NAME">myLog</property>
+        <property name="log.sql.level">info</property>
+    </properties>
+
+<!--日志输出目的地：常用的类型有控制台，文件和滚动文件-->
+    <Appenders>
+<!--      输出到控制台  -->
+        <Console name="Console" target="SYSTEM_OUT">
+<!--            设置输出到控制台的格式-->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %l - %msg%n" />
+        </Console>
+<!-- 滚动文件：不将日志写入到同一个文件中。将日志信息写入到指定的文件下
+    name 定义一个名字以便于被引用
+    fileName ：指定的文件的名称
+    filePattern：指定当发生文件滚动时，文件的转移和重命名规则
+ -->
+        <RollingRandomAccessFile name="RollingRandomAccessFile" fileName="${LOG_HOME}/${FILE_NAME}.log" filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd HH-mm}-%i.log">
+<!--        用于指定输出文件的格式（如 日志输出的时间 文件 方法 行数 等格式）   -->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %l - %msg%n"/>
+            <Policies>
+<!--            生成新的日志文件的时间，需要和filePattern结合使用，当设置为1时，表示1分钟后生成新的日志文件-->
+                <TimeBasedTriggeringPolicy interval="1"/>
+<!--            当写入的日志信息大于指定的size值的时候触发滚动文件-->
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+<!--            指定最多保存的文件个数-->
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+    </Appenders>
+<!--日志记录器：负责产生日志，并对日志进行筛选-->
+    <Loggers>
+<!--根日志器-->
+        <Root level="info">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingRandomAccessFile" />
+        </Root>
+<!--自定义日志器，name可以根据包名进行设置  additivity：相加性，是否继承下面的日志器  level：日志级别-->
+        <Logger name="com.cjx.mapper" level="${log.sql.level}" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+    </Loggers>
+</Configuration>
